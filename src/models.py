@@ -7,6 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    favorites = db.relationship("Favorites", back_populates = "user", lazy = True)
 
     def __repr__(self):
         return '<User %r>' % self.id
@@ -17,6 +18,9 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+
+    def serialize_favorites(self):
+        return [favorite.serialize() for favorite in self.favorites]
     
 #Creacion de la tabla de planetas
 class Planet(db.Model):
@@ -54,7 +58,6 @@ class Person(db.Model):
     gender = db.Column(db.String(10), unique=False, nullable=False)
     hair_color = db.Column(db.String(15), unique=False, nullable=False)
     height = db.Column(db.String(3), unique=False, nullable=False)
-    height = db.Column(db.String(3), unique=False, nullable=False)
     """ homeworld_id = db.Column(db.Integer, db.ForeignKey(Planet.id), nullable=False)
     homeworld = db.relationship(Planet)
     """
@@ -65,14 +68,11 @@ class Person(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "diameter": self.diameter,
-            "rotation_period": self.rotation_period,
-            "orbital_period": self.orbital_period,
-            "population": self.population,
-            "terrain": self.terrain,
-            "surface_water": self.surface_water,
-            "Planet":self.homeworld,
-            "planet_id": self.homeworld_id
+            "birth_year": self.birth_year,
+            "eye_color": self.eye_color,
+            "gender": self.gender,
+            "hair_color": self.hair_color,
+            "height": self.height,
         }
 
 
@@ -92,6 +92,9 @@ class Favorites(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "Person": self.person,
-            "Homeworld": self.homeworld,
+            "User": self.user.serialize(),
+            "Person": self.person_id,
+            "Homeworld": self.homeworld_id
         }
+    
+
